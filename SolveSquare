@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <math.h>
+#include <cassert>
+
+//-----------------------------------------------------------------------------
+
+int SolveSquare (double a, double b, double c, double* x1, double* x2);
+int IsZero (double value);
+void Test_IsZero();
+
+//-----------------------------------------------------------------------------
+
+int main()
+    {
+
+    double a = 0;
+    double b = 0;
+    double c = 0;
+
+    printf("Enter coeffs:\n");
+    scanf ("%lg %lg %lg",&a ,&b, &c);
+    printf("We'll solve: %.3lgx^2 + %.3lgx + %.3lg = 0\n",a ,b ,c);
+
+    double x1 = 0;
+    double x2 = 0;
+
+    int nOfRoots = SolveSquare (a, b, c, &x1, &x2);
+
+    if (nOfRoots == 2)
+        printf ("x1 = %.3lg x2 = %.3lg\n",x1 ,x2);
+    else
+        {
+        if (nOfRoots == 1)
+            printf ("x1 = %.3lg\n",x1);
+        else
+            {
+            if (nOfRoots == 0)
+                printf ("No roots\n");
+            else
+                printf ("Infinity roots\n");
+            }
+        }
+    return 0;
+    }
+
+//-----------------------------------------------------------------------------
+
+int SolveSquare (double a, double b, double c, double* x1, double* x2)
+    {
+
+    assert (&x1 != NULL);
+    assert (&x2 != NULL);
+    assert (&x1 != &x2);
+
+    if (IsZero(a))
+        {
+        if (IsZero(b))
+            {
+            if (IsZero(c))
+                return -1;
+            else
+                return  0;
+            }
+        else
+            {
+            *x1 = -c/b ;
+            return 1;
+            }
+        }
+    else
+        {
+        double discr = b*b - 4*a*c;
+
+        if (discr < 0)
+            return 0;
+        else
+            {
+            if (discr > 0)
+                {
+                *x1 = (-b - sqrt(discr)) / (2 * a);
+                *x2 = (-b + sqrt(discr)) / (2 * a);
+                return 2;
+                }
+            else
+                {
+                *x1 = (-b) / (2 * a);
+                if (*x1 = -0)
+                *x1 == 0;
+                return 1;
+                }
+            }
+        }
+    }
+
+
+//-----------------------------------------------------------------------------
+
+int IsZero (double value)
+    {
+    if (fabs (value) < 1e-5) return 1;
+    else                     return 0;
+    }
+
+
+//-----------------------------------------------------------------------------
+
+void Test_IsZero()
+    {
+
+    int res = IsZero (0);
+
+    if (res == 1) printf("Test #1 OK");
+    else          printf("Test #1 Bad: IsZero(0) == %d, should be 1\n", res);
+
+
+    res = IsZero (1);
+
+    if (res == 0) printf("Test #2 OK");
+    else          printf("Test #2 Bad: IsZero(1) == %d, should be 0\n", res);
+
+    }
+
