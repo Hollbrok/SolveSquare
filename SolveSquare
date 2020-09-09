@@ -1,122 +1,127 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <locale.h>
 #include <math.h>
-#include <cassert>
+#include <float.h>
+
 
 //-----------------------------------------------------------------------------
 
-int SolveSquare (double a, double b, double c, double* x1, double* x2);
-int IsZero (double value);
-void Test_IsZero();
-
-//-----------------------------------------------------------------------------
+int iszero (double value);
+int lin_eq_sol (double a, double b, double *x1, double *x2);
+int square_eq_sol (double a, double b, double c, double *x1, double *x2);
+int solve_square(double *x1, double *x2);
+void res_sq_sol(int roots, double *x1, double *x2);
 
 int main()
+{
+    setlocale(LC_ALL, "Russian");
+
+    double x1 = 0, x2 = 0;
+
+    int roots = solve_square(&x1, &x2);
+
+    res_sq_sol(roots, &x1, &x2);
+
+    return 0;
+}
+
+int solve_square(double *x1, double *x2)
     {
 
-    double a = 0;
-    double b = 0;
-    double c = 0;
+    printf("Решим любое квадратное уравнение вида ax^2+bx+c=0\n");
+    printf("Для начала введите три коэффициента квадратного уравнения a, b и c:\n");
 
-    printf("Enter coeffs:\n");
-    scanf ("%lg %lg %lg",&a ,&b, &c);
-    printf("We'll solve: %.3lgx^2 + %.3lgx + %.3lg = 0\n",a ,b ,c);
+    double a = 0, b = 0, c = 0;
 
-    double x1 = 0;
-    double x2 = 0;
-
-    int nOfRoots = SolveSquare (a, b, c, &x1, &x2);
-
-    if (nOfRoots == 2)
-        printf ("x1 = %.3lg x2 = %.3lg\n",x1 ,x2);
-    else
+    while (scanf("%lf %lf %lf", &a, &b, &c) != 3)
         {
-        if (nOfRoots == 1)
-            printf ("x1 = %.3lg\n",x1);
-        else
-            {
-            if (nOfRoots == 0)
-                printf ("No roots\n");
-            else
-                printf ("Infinity roots\n");
-            }
+        printf("Пожалуйста, введите именно числа, и именно три :\n");
+        fflush (stdin);
         }
-    return 0;
+
+    int roots = square_eq_sol(a, b, c, x1, x2);
+
+    return roots;
     }
 
-//-----------------------------------------------------------------------------
-
-int SolveSquare (double a, double b, double c, double* x1, double* x2)
+int square_eq_sol (double a, double b, double c, double *x1, double *x2)
     {
 
-    assert (&x1 != NULL);
-    assert (&x2 != NULL);
-    assert (&x1 != &x2);
-
-    if (IsZero(a))
+    if (iszero(a))
+        return lin_eq_sol(b, c, x1, x2);
+    else
         {
-        if (IsZero(b))
+        int d = b*b - 4*a*c;
+
+        if ((iszero(d) == 0) && (d < 0))
+           {
+            *x1 = *x2 = 0;
+            return 0;
+           }
+        else if (iszero(d))
             {
-            if (IsZero(c))
-                return -1;
-            else
-                return  0;
-            }
-        else
-            {
-            *x1 = -c/b ;
+            if (iszero(-b/2/a))
+                 *x1 = *x2 = fabs(-b/2/a);
+            else *x1 = *x2 = -b/2/a;
             return 1;
             }
-        }
-    else
-        {
-        double discr = b*b - 4*a*c;
-
-        if (discr < 0)
-            return 0;
-        else
+        else if ((iszero(d) == 0) && (d > 0))
             {
-            if (discr > 0)
+            *x1 = (-b - sqrt(d))/2/a;
+            *x2 = (-b + sqrt(d))/2/a;
+            return 2;
+            }
+        }
+
+    }
+
+int lin_eq_sol (double a, double b, double *x1, double *x2)
+    {
+
+    if (iszero(a))
+            {
+            if (iszero(b))
                 {
-                *x1 = (-b - sqrt(discr)) / (2 * a);
-                *x2 = (-b + sqrt(discr)) / (2 * a);
-                return 2;
+                *x1 = *x2 = 0;
+                return -1;
                 }
             else
                 {
-                *x1 = (-b) / (2 * a);
-                if (*x1 = -0)
-                *x1 == 0;
-                return 1;
+                *x1 = *x2 = 0;
+                return 0;
                 }
             }
+    else
+        {
+
+        if (iszero(-b/a))
+            *x1 = *x2 = fabs(-b/a); // Если b = 0 ,то выведет на экран 0,а не -0
+        else *x1 = *x2 = -b/a;
+
+        return 1;
         }
     }
 
-
-//-----------------------------------------------------------------------------
-
-int IsZero (double value)
+void res_sq_sol(int roots, double *x1, double *x2)
     {
-    if (fabs (value) < 1e-5) return 1;
-    else                     return 0;
+
+    if (roots == 0)
+        printf("К сожалению, корней нет\n");
+    else if (roots == 1)
+        printf("Корень уравнения один и равен  %.6lf\n", *x1);
+    else if (roots == 2)
+        printf("Корни уравнения равны %.6lf и %.6lf\n", *x1, *x2);
+    else if (roots == -1)
+        printf("Множество корней уравнения бесконечно\n");
     }
 
-
-//-----------------------------------------------------------------------------
-
-void Test_IsZero()
+int iszero (double value)
     {
 
-    int res = IsZero (0);
-
-    if (res == 1) printf("Test #1 OK");
-    else          printf("Test #1 Bad: IsZero(0) == %d, should be 1\n", res);
-
-
-    res = IsZero (1);
-
-    if (res == 0) printf("Test #2 OK");
-    else          printf("Test #2 Bad: IsZero(1) == %d, should be 0\n", res);
-
+    if (fabs (value) < 1e-6)
+        return 1;
+    else
+        return 0;
     }
 
